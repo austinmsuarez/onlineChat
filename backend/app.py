@@ -186,21 +186,23 @@ def newMessage(username,messageID):
           response = Response(invalMsg, 404, mimetype = 'application/json')
 
 @app.route("/login",methods=['POST'])
-def getUserVerified(username,password):
+def getUserVerified():
     b_auth = myAuthorizor()
     db = get_db()
     db.row_factory = dict_factory
     conn = db.cursor()
 
     req_data = request.get_json()
-    username = req_data['username']
-    password = req_data['password']
+    print(req_data)
+    username = request.authorization['username']
+    password = request.authorization['password']
 
     if b_auth.check_credentials(username, password):
         response = Response("HTTP 202 Accepted",202,mimetype = 'application/json')
 
     else:
         response = Response("HTTP 403 Forbidden",403,mimetype = 'application/json')
+    return response
 
 if __name__ == "__main__":
   app.run(debug=True)
