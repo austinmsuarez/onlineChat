@@ -38,17 +38,17 @@
             },
 
             getLoginResponseAPI(){
+                var verified = ""
                  const path = 'http://127.0.0.1:5000/login';
                  console.log("bye")
 
-                 axios.post(path,
-                    {Authorization: {
+                 console.log(axios.post(path,
+                     {
                         username: this.username,
-                        password: this.password
-                    }}
-                 )
-                 console.log("hello")
-            }
+                        password: this.psw
+                    }
+                 ).then(response => {response.status}))
+             }
         }
     };
    

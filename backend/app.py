@@ -3,9 +3,10 @@ from flask_basicauth import BasicAuth
 import json
 import sqlite3
 import time, datetime
-
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 # Sets the path of the database
 DATABASE = './data.db'
@@ -194,8 +195,8 @@ def getUserVerified():
 
     req_data = request.get_json()
     print(req_data)
-    username = request.authorization['username']
-    password = request.authorization['password']
+    username = req_data['username']
+    password = req_data['password']
 
     if b_auth.check_credentials(username, password):
         response = Response("HTTP 202 Accepted",202,mimetype = 'application/json')
