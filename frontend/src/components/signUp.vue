@@ -12,9 +12,13 @@
             <br>
             <input type="password" v-model="psw">
             <br>
-            <input class="buttons" v-on:click="login" type="submit" value="Login">
+            Confirm Password:
+            <br>
+            <input type="password" v-model="pswConfirm">
+            <br>
+            <input class="buttons" v-on:click="signUp" type="submit" value="Sign Up">
+            <p class="errorMessage">{{errorMessage}}</p>
         </form>
-        <input class="buttons" v-on:click="signUp" type="submit" value="Sign Up">
     </div>
 </template> 
 
@@ -29,24 +33,18 @@
         data: () => {
             return {
                 username: '',
-                psw: ''
+                psw: '',
+                pswConfirm: '',
+                errorMessage: ''
             };
         },
         methods: { 
-            login(){
-                if(this.username != null && this.psw != null){
-                    this.getLoginResponseAPI()
-                }
-                else{
-                    console.log("input both parameters")
-                }
-            },
 
-            getLoginResponseAPI(){
+            getSignUpResponseAPI(){
                 var verified = ""
-                const path = 'http://127.0.0.1:5000/login';
+                const path = 'http://127.0.0.1:5000/signup';
                 
-                 axios.post(path,
+                axios.post(path,
                     {
                         username: this.username,
                         password: this.psw
@@ -56,17 +54,29 @@
                         "Access-Control-Allow-Origin": "*",
                     }}
                  ).then(response => { 
-                        if(response.status == 202){
+                        if(response.status == 201){
                             localStorage.username = this.username;
                             localStorage.password = this.psw;
                             console.log("saved and transitioning");
                             this.$router.push({name:'myChat'});
-                        } 
+                        }
+                       
                     })
+                    .catch(error=> {
+                        console.log(error.response)
+                        if(error.response.status == 409){
+                            this.errorMessage = "USERNAME UNAVAILABLE"
+                        }
+                    });
              },
         
             signUp(){
-                this.$router.push({name:'signUp'});
+                if(this.psw == this.pswConfirm){
+                    this.getSignUpResponseAPI();
+                }
+                else{
+                    this.errorMessage = "PASSWORDS DO NOT MATCH";
+                }
             }
         
         },
@@ -93,6 +103,10 @@
   color: white;
   font-size: 12pt;
   background-color: #4caf50;
+}
+.errorMessage{
+    margin-top: 10px;
+    color: darkred;
 }
 </style>
 

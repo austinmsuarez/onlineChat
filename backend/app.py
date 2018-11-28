@@ -80,29 +80,31 @@ def getMessageList():
     conn = db.cursor()
 
     req_data = request.get_json()
-    username = req_data['username']
-    password = req_data['password']
-
+    username = request.authorization['username']
+    password = request.authorization['password']
     if b_auth.check_credentials(username, password):
-      myMessageList = conn.execute('SELECT * FROM message_list WHERE userSender = ? OR userRecieve = ?', (username,username))
-      print(myMessageList)
-      #returns a success response
-      return jsonify(myMessageList)
+      myMessageList = conn.execute('SELECT * FROM message_list WHERE userSender = \'' + username + '\' OR userRecieve = \''+ username +'\'').fetchall()
+      myMessageList =  jsonify(myMessageList)
+      response = myMessageList
+      response.status_code = 200
+    else:
+      response = Response("HTTP 403 Forbidden",403,mimetype = 'application/json')
+    return response
 
-
-@app.route("/messageList/<username>/<messageID>", methods=['GET'])
-def getMessages(username,messageID):
+@app.route("/messageList/<messageID>", methods=['GET'])
+def getMessages(messageID):
     b_auth = myAuthorizor()
     db = get_db()
     db.row_factory = dict_factory
     conn = db.cursor()
 
     req_data = request.get_json()
-    username = req_data['username']
-    password = req_data['password']
+    username = request.authorization['username']
+    password = request.authorization['password']
 
     if b_auth.check_credentials(username, password):
-        myMessageList = conn.execute('SELECT * FROM messages WHERE messageID = ?', (messageID))
+        myMessageList = conn.execute('SELECT * FROM messages WHERE msgID =\'' + messageID +'\'').fetchall()
+        return jsonify(myMessageList)
 
 #########################################
 # POSTs
@@ -114,11 +116,11 @@ def addUser():
     conn = db.cursor()
 
     req_data = request.get_json()
-    newUser = req_data['username']
-    newPass = req_data['password']
+    username = req_data['username']
+    password = req_data['password']
 
-    if valid_username(newUser):
-      conn.execute('INSERT INTO auth_users(username,password) VALUES(\''+newUser+'\',\''+ newPass+'\')')
+    if valid_username(username):
+      conn.execute('INSERT INTO auth_users(username,password) VALUES(\''+username+'\',\''+ password+'\')')
       db.commit()
       #returns a success response
       response = Response("HTTP 201 Created",201,mimetype = 'application/json')
@@ -127,7 +129,7 @@ def addUser():
       response = Response("HTTP 409 Conflict if username already exists\n",409,mimetype = 'application/json')
     return response
 
-@app.route("/messageList/<username>",methods=['POST'])
+@app.route("/messageList",methods=['POST'])
 def newMessageList(username):
     
     b_auth = myAuthorizor()
@@ -158,8 +160,8 @@ def newMessageList(username):
     
     return response
 
-@app.route("/messageList/<username>/<messageID>", methods=['POST'])
-def newMessage(username,messageID):
+@app.route("/messageList/<messageID>", methods=['POST'])
+def newMessage(messageID):
     
     b_auth = myAuthorizor()
     db = get_db()
@@ -167,24 +169,26 @@ def newMessage(username,messageID):
     conn = db.cursor()
 
     req_data = request.get_json()
-    username = req_data['username']
-    password = req_data['password']
-
+    username = request.authorization['username']
+    password = request.authorization['password']
+    print(req_data)
     msg = req_data['msg']
     messageID = req_data['msgID']
-    # Create the timestamp
-    ts = time.time()
-    time_stamp = st = datetime.datetime.fromtimestamp(ts).strftime('%a, %d %b %Y %H:%M:%S %Z')
-    tmp = time_stamp + "GMT"
-    time_stamp = datetime.datetime.strptime(tmp,'%a, %d %b %Y %H:%M:%S %Z')
+    sender = req_data['sender']
+    reciever = req_data['reciever']
+
+   
     #checks to see if user has proper auth
     if b_auth.check_credentials(username, password):
-       conn.execute('INSERT INTO messages(msg, msgID, timeUpdate) VALUES(?,?,?)',(msg, messageID,time_stamp))
+       conn.execute('INSERT INTO messages(msg, msgID, sender,reciever) VALUES(?,?,?,?)',(msg, messageID,sender,reciever))
+       db.commit()
+       conn.execute('UPDATE message_list SET convoPreview = \''+msg+'\' WHERE messageID =\'' + str(messageID) +'\'')
        db.commit()
        response = Response("HTTP 201 Created\n", 201, mimetype = 'application/json')
     else:
           invalMsg = "HTTP 401 Not Authorized"
           response = Response(invalMsg, 404, mimetype = 'application/json')
+    return response
 
 @app.route("/login",methods=['POST'])
 def getUserVerified():
@@ -194,7 +198,6 @@ def getUserVerified():
     conn = db.cursor()
 
     req_data = request.get_json()
-    print(req_data)
     username = req_data['username']
     password = req_data['password']
 

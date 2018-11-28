@@ -1,7 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import HelloWorld from '@/components/HelloWorld'
 import loginPage from '@/components/loginPage'
+import signUp from '@/components/signUp'
+import myChat from '@/components/myChat'
 
 Vue.use(Router)
 
@@ -9,13 +10,23 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'HelloWorld',
-      component: HelloWorld
+      redirect: '/login'
     },
     {
       path: '/login',
       name: 'loginPage',
       component: loginPage
+    },
+    {
+      path: '/signup',
+      name: 'signUp',
+      component: signUp
+    },
+
+    {
+      path: '/myChat',
+      name: 'myChat',
+      component: myChat
     }
   ]
 })
