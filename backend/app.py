@@ -104,8 +104,9 @@ def getMessages(messageID):
 
     if b_auth.check_credentials(username, password):
         myMessageList = conn.execute('SELECT * FROM messages WHERE msgID =\'' + messageID +'\'').fetchall()
-        return jsonify(myMessageList)
-
+        response = jsonify(myMessageList)
+        response.status_code = 200
+        return response
 #########################################
 # POSTs
 #########################################
@@ -130,34 +131,30 @@ def addUser():
     return response
 
 @app.route("/messageList",methods=['POST'])
-def newMessageList(username):
-    
+def newMessageList():
     b_auth = myAuthorizor()
     db = get_db()
     db.row_factory = dict_factory
     conn = db.cursor()
 
     req_data = request.get_json()
-    username = req_data['username']
-    password = req_data['password']
-
-    convoTitle = req_data['convoTitle']
+    username = request.authorization['username']
+    password = request.authorization['password']
+    print(req_data)
     convoPreview = req_data['convoPreview']
-    timeUpdate = req_data['timeUpdate']
-    userSender = req_data['userSender']
-    userFrom = req_data['userFrom']
+    userSender = req_data['sender']
+    recepient = req_data['recepient']
     
     #checks to see if user has proper auth
     if b_auth.check_credentials(username, password):
-      conn.execute('INSERT INTO message_list(convoTitle, convoPreview, timeUpdate, userSender, userFrom) VALUES(?,?,?,?)',(convoTitle,convoPreview,timeUpdate,userSender,userFrom))
+      conn.execute('INSERT INTO message_list(convoPreview, userSender, userRecieve) VALUES(?,?,?)',(convoPreview,userSender,recepient))
       db.commit()
       #returns a success response
       response = Response("HTTP 201 Created",201,mimetype = 'application/json')
     
     else:
-      #returns a success response
-      response = Response("HTTP 409 Conflict if username already exists\n",409,mimetype = 'application/json')
-    
+      #returns a error response
+      response = Response("HTTP 409 Conflict if messageList already exists\n",409,mimetype = 'application/json')
     return response
 
 @app.route("/messageList/<messageID>", methods=['POST'])
@@ -203,7 +200,6 @@ def getUserVerified():
 
     if b_auth.check_credentials(username, password):
         response = Response("HTTP 202 Accepted",202,mimetype = 'application/json')
-
     else:
         response = Response("HTTP 403 Forbidden",403,mimetype = 'application/json')
     return response

@@ -4,19 +4,14 @@
         <img src="../assets/logo.png" alt="onlineChat logo">
         <h1>OnlineChat</h1> 
         <form id = "loginForm">
-            Username:
             <br>
-            <input type="text" v-model="username">
-            <br> 
-            Password:
+            <input id="inputText" placeholder="Username" type="text" v-model="username">
             <br>
-            <input type="password" v-model="psw">
+            <input id="inputText" placeholder="Password" type="password" v-model="psw">
             <br>
-            Confirm Password:
+            <input id="inputText" placeholder="Confirm Password" type="password" v-model="pswConfirm">
             <br>
-            <input type="password" v-model="pswConfirm">
-            <br>
-            <input class="buttons" v-on:click="signUp" type="submit" value="Sign Up">
+            <input id="buttons" v-on:click="signUp" type="submit" value="Sign Up">
             <p class="errorMessage">{{errorMessage}}</p>
         </form>
     </div>
@@ -94,7 +89,7 @@
 </script>
 
 <style>
-.buttons{
+#buttons{
   margin-top: 10px;
   border-radius: 10px;
   padding-left: 10%;
@@ -104,9 +99,19 @@
   font-size: 12pt;
   background-color: #4caf50;
 }
+
+
 .errorMessage{
     margin-top: 10px;
     color: darkred;
+}
+#inputText{
+    border: 2px solid lightgrey;
+    width: 20%;
+    border-radius: 4px;
+}
+#inputText:focus{
+     border: 3px solid #4caf50;
 }
 </style>
 
