@@ -336,6 +336,9 @@ export default {
 }
 
 .messageText {
+  margin-top:    15px;
+  margin-left:   5px;
+  width:         50%;
   display:       inline;
   padding:       5px;
   border-radius: 25px;
@@ -345,6 +348,7 @@ export default {
      border: 3px solid #4caf50;
 }
 .sendMessageButton {
+  margin-left: 10px;
   border: none;
   bottom: 0px;
   padding: 5px;
