@@ -47,7 +47,8 @@ export default {
       timerConvoList: '',
       sentMessage: 'sentMessage',
       recievedMessage: 'recievedMessage',
-      sent: ''
+      sent: '',
+      posted: ''
     };
   },
   methods: {
@@ -60,8 +61,8 @@ export default {
       axios.get(path, {
           //  passes in the authorization paramenters
           auth: {
-            username: this.username,
-            password: this.password
+            username: localStorage.username,
+            password: localStorage.psw
           }
         })
         .then(response => {
@@ -71,7 +72,7 @@ export default {
           for (var message in response.data) {
             //  assigns the messageTitle correctly so that it displays the other name instead
             //  the current user's name
-            if (this.username = response.data[message].userSender) {
+            if (localStorage.username == response.data[message].userSender) {
               this.messageTitle = response.data[message].userRecieve
             } else {
               this.messageTitle = response.data[message].userSender
@@ -85,13 +86,13 @@ export default {
           }
         });
     },
-    // TODO: make this
+
     newMessage() {
-      this.messageListItems.push({
-        title: "newMessage",
-        preview: '',
-      })
+      this.recepient = ''
+      this.message = ''
+      this.convoHistory = []
     },
+
     // TODO: fix this
     newMessagePost() {
       const path = 'http://127.0.0.1:5000/messageList'
@@ -99,29 +100,27 @@ export default {
           .post(
             path, {
               convoPreview: this.message,
-              sender: this.username,
+              sender: localStorage.username,
               recepient: this.recepient
             }, {
               auth: {
-                username: this.username,
-                password: this.password
+                username: localStorage.username,
+                password: localStorage.psw
               }
             }
           )
           .then(response => {
-            this.getMessageList()
-            console.log(this.messageListItems.length)
-            this.msgID = this.messageListItems[this.messageListItems.length].messageID
+            this.getMessageID(this.recepient)
           })
     },
+
     // Gets all messages from the conversation
     openMessage(title, id) {
       // assigns values
       this.recepient = title
-      console.log(this.recepient)
-      const path = 'http://127.0.0.1:5000/messageList/' + this.msgID
       this.msgID = id
-      console.log(this.msgID)
+      const path = 'http://127.0.0.1:5000/messageList/' + this.msgID
+      
       //  clears the message list so there is no duplicates 
       this.convoHistory = []
       //  checks to make sure that the messageID is defined and it is not trying
@@ -129,15 +128,15 @@ export default {
       if (this.msgID != undefined) {
         axios.get(path,{
                 auth: {
-                username: this.username,
-                password: this.password
+                username: localStorage.username,
+                password: localStorage.psw
                 }
             })
           .then(response => {
             //  goes through data and adds the information to the array 
             for (var message in response.data) {
               // used for styling based on sender
-              if (response.data[message].sender === this.username) {
+              if (response.data[message].sender === localStorage.username) {
                 this.sent = true
               } else {
                 this.sent = false
@@ -147,42 +146,73 @@ export default {
                 sent: this.sent
               })
             }
+            this.getMessageList()
           })
       }
     },
+
+    getMessageID(recepient){
+        const path = 'http://127.0.0.1:5000/'+recepient
+        axios.get(path, {
+                auth: {
+                username: localStorage.username,
+                password: localStorage.psw
+                }
+            })
+            .then(response => {
+               this.msgID = response.data[0].messageID
+               axios.post(
+                'http://127.0.0.1:5000/messageList/' + this.msgID, {
+                    msg: this.message,
+                    msgID: this.msgID,
+                    sender: localStorage.username,
+                    reciever: this.recepient
+                }, {
+                    auth: {
+                    username: localStorage.username,
+                    password: localStorage.psw
+                    }
+                }
+                )
+                .then(response => {
+                    this.message = ''    
+                    this.openMessage(this.recepient, this.msgID)
+                })       
+                
+        })   
+        
+    },
     //  sends the message
     sendMessage(message) {
-      // assign variables
-      this.message = message
-      console.log(this.msgID)
-      const path = 'http://127.0.0.1:5000/messageList/' + this.msgID
-
-      // checks if there is any messages in the convo history 
-      // if not then send a post request to add the message convo to the table
-      if (this.convoHistory.length === 0) {
-        this.newMessagePost()
-      }
-    console.log("hello")
-
-    axios.post(
-        path, {
-            msg: this.message,
-            msgID: this.msgID,
-            sender: this.username,
-            reciever: this.recepient
-        }, {
-            auth: {
-            username: this.username,
-            password: this.password
-            }
+        // assign variables
+        this.message = message
+     
+        // checks if there is any messages in the convo history 
+        // if not then send a post request to add the message convo to the table
+        if (this.convoHistory.length === 0) {
+            this.newMessagePost()
         }
-        )
-        .then(response => {
-        console.log("hello")
-        this.message = ''
-        this.openMessage(this.recepient, this.msgID)
-        this.getMessageList()
-    })        
+        else{
+                axios.post(
+                'http://127.0.0.1:5000/messageList/' + this.msgID, {
+                    msg: this.message,
+                    msgID: this.msgID,
+                    sender: localStorage.username,
+                    reciever: this.recepient
+                }, {
+                    auth: {
+                    username: localStorage.username,
+                    password: localStorage.psw
+                    }
+                }
+                )
+                .then(response => {
+                    this.message = ''
+                    this.openMessage(this.recepient, this.msgID)
+                    
+                })       
+        }
+        
     }
   },
 
@@ -198,7 +228,6 @@ export default {
   height: 100%;
   position: fixed;
   width: 200px;
-  z-index: 1;
   top: 0px;
   left: 0px;
   background-color: #1111;
@@ -214,101 +243,107 @@ export default {
 }
 
 .messageListBody {
-  margin-bottom: 10%;
-  height: 100%;
-  width: 200px;
+  height:   100%;
+  width:    200px;
   position: fixed;
-  top: 50px;
-  left: 0px;
+  top:      50px;
+  bottom:   50px;
+  left:     0px;
   overflow: scroll;
 }
 
 .messageListItem {
-  list-style-type: none;
-  border-bottom: 1px solid white;
+  list-style-type:  none;
+  margin-left:      10px;
+  border-bottom:    1px solid white;
 }
-
+.messageListItem:hover{
+  background-color: #4caf50;
+  color:            white;
+}
 #messageTitle {
   font-weight: bold;
   text-align: left;
 }
 
 .messageLog {
-  height: 100%;
-  margin-left: 160px;
-  background-color: rgb(33, 150, 243);
-  left: 0px;
-  top: 0px;
+  height:  100%;
+  left:    200px;
+  top:     0px;
 }
 
 .messageHeader {
-  text-align: left;
+  text-align:       left;
   background-color: #1111;
-  top: 0px;
-  left: 0px;
-  position: fixed;
-  width: 100%;
-  height: 50px;
-  margin-left: 200px;
+  top:              0px;
+  left:             0px;
+  width:            100%;
+  height:           50px;
+  margin-left:      200px;
+  position:         fixed;
 }
 
 .messageHeader p {
-  left: 0px;
-  text-align: left;
-  display: inline-block;
+  left:             0px;
+  text-align:       left;
+  display:          inline-block;
 }
 
-.messageHeader input {
-  border: none;
-  width: 50%;
+.messageHeader input{
+  border:           none;
+  display:          inline-block;
+  border-radius:    10px;
+  width:            80%;
+  min-width:        100px;
+}
+.messageHeader input:focus{
+     border: 3px solid #4caf50;
+}
+.messageHistory{
+  top:              50px;
+  left:             200px;
+  right:            0px;
+  bottom:           50px;
+  position:         fixed;
+  overflow:         scroll;
 }
 
-.messageHistory {
-  margin-left: 200px;
-  margin-bottom: 60px;
-  top: 50px;
-  width: 80%;
-  left: 0px;
-  height: 80%;
-  position: fixed;
-  overflow: scroll;
-}
-
-.recievedMessage {
-  text-align: left;
+.recievedMessage{
+  text-align:       left;
   background-color: #1111;
-  list-style-type: none;
+  list-style-type:  none;
 }
 
-.sentMessage {
-  text-align: right;
+.sentMessage{
+  text-align:       right;
   background-color: #4caf50;
-  color: white;
-  list-style-type: none;
+  color:            white;
+  list-style-type:  none;
 }
 
-#messagePreview {
+#messagePreview{
   text-align: left;
 }
 
 .messageEntry {
-  text-align: left;
+  text-align:       left;
   background-color: #1111;
-  bottom: 0px;
-  left: 0px;
-  position: fixed;
-  width: 100%;
-  height: 50px;
-  margin-left: 200px;
+  bottom:           0px;
+  left:             200px;
+  position:         fixed;
+  width:            100%;
+  height:           50px;
 }
 
 .messageText {
-  margin: 20px;
-  display: inline;
-  padding: 5px;
+  display:       inline;
+  padding:       5px;
   border-radius: 25px;
+  border:       none;
 }
-
+.messageText:focus{
+     border: 3px solid #4caf50;
+}
 .sendMessageButton {
   border: none;
   bottom: 0px;
@@ -324,7 +359,7 @@ export default {
   bottom: 0px;
   left: 0px;
   position: fixed;
-  height: 10%;
+  height: 50px;
   width: 200px;
   color: white;
   font-size: 12pt;

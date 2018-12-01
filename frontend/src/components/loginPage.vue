@@ -76,6 +76,8 @@
              },
         
             signUp(){
+                localStorage.username = name
+                localStorage.psw = password
                 this.$router.push({name:'signUp'});
             }
         

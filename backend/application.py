@@ -107,6 +107,25 @@ def getMessages(messageID):
         response = jsonify(myMessageList)
         response.status_code = 200
         return response
+
+@app.route("/<reciever>", methods=['GET'])
+def getMessageID(reciever):
+    b_auth = myAuthorizor()
+    db = get_db()
+    db.row_factory = dict_factory
+    conn = db.cursor()
+
+    req_data = request.get_json()
+    username = request.authorization['username']
+    password = request.authorization['password']
+
+    if b_auth.check_credentials(username, password):
+        myMessageList = conn.execute('SELECT * FROM message_list WHERE userRecieve =\'' + reciever +'\'').fetchall()
+        print(jsonify(myMessageList))
+        response = jsonify(myMessageList)
+        response.status_code = 200
+        return response
+
 #########################################
 # POSTs
 #########################################
@@ -140,7 +159,6 @@ def newMessageList():
     req_data = request.get_json()
     username = request.authorization['username']
     password = request.authorization['password']
-    print(req_data)
     convoPreview = req_data['convoPreview']
     userSender = req_data['sender']
     recepient = req_data['recepient']
@@ -170,7 +188,6 @@ def newMessage(messageID):
     password = request.authorization['password']
     print(req_data)
     msg = req_data['msg']
-    messageID = req_data['msgID']
     sender = req_data['sender']
     reciever = req_data['reciever']
 

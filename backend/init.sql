@@ -26,10 +26,8 @@ CREATE TABLE messages(
 --Generating test cases--
 INSERT INTO auth_users VALUES(1,"alice","1234");
 INSERT INTO auth_users VALUES(2,"bob", "5678");
-INSERT INTO auth_users VALUES(3,"charlie","Gr3attPA$$W0Rd");
+INSERT INTO auth_users VALUES(3,"charlie","123");
 INSERT INTO message_list VALUES(1,"Did you see that movie last week?","alice","charlie");
-INSERT INTO message_list VALUES(2,"Did you see that movie last week?","alice","bob");
-INSERT INTO message_list VALUES(3,"Did you see that movie last week?","charlie","bob");
 INSERT INTO messages VALUES("Hey how are you?", 1, "charlie", "alice");
 INSERT INTO messages VALUES("I am good!", 1, "alice", "charlie");
 INSERT INTO messages VALUES("Did you see that movie last week?", 1, "charlie", "alice");
