@@ -5,7 +5,7 @@ import signUp from '@/components/signUp'
 import myChat from '@/components/myChat'
 
 Vue.use(Router)
-
+// this page is to set up routing to different components
 export default new Router({
   routes: [
     {

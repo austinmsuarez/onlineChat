@@ -40,14 +40,16 @@
                     console.log("input both parameters")
                 }
             },
-
+            //gets a login response if the correct credentials are entered
             getLoginResponseAPI(){
                  var verified = ""
                  const path = 'http://127.0.0.1:5000/login';
+                 //checks to make sure the user has entered something into username and password space
                  if(this.username == '' || this.psw == ''){
                     this.errorMessage = "ENTER USERNAME OR PASSWORD"
                  }
                  else{
+                    // saves the username and password locally for future use without having to re-request from user 
                     localStorage.username = this.username;
                     localStorage.password = this.psw;
                     axios.post(path,
@@ -61,6 +63,7 @@
                     }}
 
                     ).then(response => { 
+                            // if the login was successful 
                             if(response.status == 202){
                                 localStorage.username = this.username;
                                 localStorage.password = this.psw;
@@ -68,19 +71,20 @@
                                 this.$router.push({name:'myChat'});
                             } 
                         }).catch(error=>{
+                            // if it wasnt 
                             if(error.response.status == 409){
                                 this.errorMessage = "INVALID USERNAME OR PASSWORD"
                             }
                         });
                 }
              },
-        
+            // sends user to login page 
             signUp(){
                 this.$router.push({name:'signUp'});
             }
         
         },
-
+        // watches for changes to username and password 
         watch: {
             username(name){
                 localStorage.username = name

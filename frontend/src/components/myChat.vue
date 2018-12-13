@@ -1,27 +1,35 @@
 <template>
   <div>
+    <!--This section is to list out conversation threads --> 
     <div class="messageList">
+      <!-- Adds a personal touch to show username above convo list --> 
       <div class="messageListHeader">
         <p>{{username}}'s message list</p>
       </div>
+      <!-- convo list assigning keys to elements --> 
       <div class="messageListBody">
         <li v-on:click="openMessage(value.title, value.id)" class="messageListItem" :key="value.id" v-for="value in messageListItems">
           <p id="messageTitle">{{ value.title }}</p>
           <p id="messagePreview">{{value.preview}}</p>
         </li>
       </div>
+      <!-- button used to create a new message Convo-->
       <input class="newMessageButton" type="button" v-on:click="newMessage" value="New Message">
     </div>
+    <!-- Div that is used to view the messages in a convo -->
     <div class="messageLog">
+      <!-- Includes the to addressing for your convo--> 
       <div class="messageHeader">
         <p>To:</p>
         <input v-model="recepient" type="text" name="text" placeholder="No recepients...">
       </div>
+      <!-- Used to view the actual messages of the conversation --> 
       <div class="messageHistory">
         <li v-bind:class="[{ sentMessage: value.sent }, recievedMessage]" :key="value.id" v-for="value in convoHistory">
           <p id="message">{{ value.message }}</p>
         </li>
       </div>
+      <!-- View to enter new message --> 
       <div class="messageEntry">
         <input class="messageText" type="text" name="text" v-model="message" placeholder="New Message...">
         <input class="sendMessageButton" type="button" v-on:click="sendMessage(message)" value="Send">
@@ -31,9 +39,11 @@
 </template>
 
 <script>
+    // used to make http requests
     import axios from "axios";
 
 export default {
+  // all variable data 
   data: () => {
     return {
       username: localStorage.username,
@@ -77,7 +87,7 @@ export default {
             } else {
               this.messageTitle = response.data[message].userSender
             }
-            //  pushes it ontothe array
+            //  pushes it onto the array
             this.messageListItems.push({
               title: this.messageTitle,
               preview: response.data[message].convoPreview,
@@ -87,15 +97,21 @@ export default {
         });
     },
 
+    //used when the user press the new message button 
+    //clears the view
     newMessage() {
       this.recepient = ''
       this.message = ''
       this.convoHistory = []
     },
 
-    // TODO: fix this
+    // posts a new message convo to the backend 
     newMessagePost() {
+      // path of the backend server 
       const path = 'http://127.0.0.1:5000/messageList'
+        // http request posts through the path the data convoPreview,sender,recepient
+        // sends out your username and password to make sure that you are authenticated
+        // TODO: find a way to encrypt all data being sent out
         axios
           .post(
             path, {
@@ -110,6 +126,7 @@ export default {
             }
           )
           .then(response => {
+            // If this is successful it gets the assigned message convo id from the server 
             this.getMessageID(this.recepient)
           })
     },
@@ -142,6 +159,7 @@ export default {
                 this.sent = false
               }
               this.convoHistory.push({
+                // loads messages 
                 message: response.data[message].msg,
                 sent: this.sent
               })
@@ -150,7 +168,7 @@ export default {
           })
       }
     },
-
+    // gets the message Id to index the convo list and retrieve messages in message history requests
     getMessageID(recepient){
         const path = 'http://127.0.0.1:5000/'+recepient
         axios.get(path, {

@@ -34,7 +34,7 @@
             };
         },
         methods: { 
-
+            // used to insert new user into database 
             getSignUpResponseAPI(){
                 var verified = ""
                 const path = 'http://127.0.0.1:5000/signup';
@@ -49,6 +49,7 @@
                         "Access-Control-Allow-Origin": "*",
                     }}
                  ).then(response => { 
+                        // if the account was created 
                         if(response.status == 201){
                             localStorage.username = this.username;
                             localStorage.password = this.psw;
@@ -58,13 +59,14 @@
                        
                     })
                     .catch(error=> {
+                        // if the username isnt available
                         console.log(error.response)
                         if(error.response.status == 409){
                             this.errorMessage = "USERNAME UNAVAILABLE"
                         }
                     });
              },
-        
+            // method used for sign up checks for matching passwords 
             signUp(){
                 if(this.psw == this.pswConfirm){
                     this.getSignUpResponseAPI();
@@ -75,7 +77,7 @@
             }
         
         },
-
+        // watches password and username changes
         watch: {
             username(name){
                 localStorage.username = name
