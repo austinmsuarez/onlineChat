@@ -212,8 +212,8 @@ def getUserVerified():
     conn = db.cursor()
 
     req_data = request.get_json()
-    username = req_data['username']
-    password = req_data['password']
+    username = request.authorization['username']
+    password = request.authorization['password']
 
     if b_auth.check_credentials(username, password):
         response = Response("HTTP 202 Accepted",202,mimetype = 'application/json')

@@ -242,13 +242,35 @@ export default {
 </script>
 
 <style>
+ .scrollable-content::-webkit-scrollbar * {
+      background:transparent;
+    }
+    .scrollable-content::-webkit-scrollbar-thumb {
+      background:#999 !important;
+    }
+::-webkit-scrollbar{
+  width:5px;
+}
+
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888; 
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}
+
 .messageList {
   height: 100%;
   position: fixed;
   width: 200px;
   top: 0px;
   left: 0px;
-  background-color: #1111;
+  background-color: lightgrey;
 }
 
 .messageListHeader {
@@ -257,9 +279,11 @@ export default {
   width: 200px;
   left: 0px;
   position: fixed;
-  background-color: #5555;
+  background-color:#4caf50;
 }
-
+.messageListHeader p {
+  color:white;
+}
 .messageListBody {
   height:   100%;
   width:    200px;
@@ -292,7 +316,7 @@ export default {
 
 .messageHeader {
   text-align:       left;
-  background-color: #1111;
+  background-color: white;
   top:              0px;
   left:             0px;
   width:            100%;
@@ -324,6 +348,7 @@ export default {
   bottom:           50px;
   position:         fixed;
   overflow:         scroll;
+  background: whitesmoke;
 }
 
 .recievedMessage{
